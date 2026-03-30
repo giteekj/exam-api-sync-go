@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"exam-api-sync-go/common"
 
 	"exam-api-sync-go/common/jwt"
@@ -33,24 +32,43 @@ func (s *LoginService) Login(req request.LoginRequest) (response.LoginResponse, 
 	var user model.SysUser
 	result := s.DB.Where("user_name = ? AND user_password = ?", req.Username, common.MD5(req.Password)).First(&user)
 	if result.Error != nil {
-		return response, errors.New("用户名或密码错误")
+		return response, common.ReturnErr(common.LOGIN_FATAL)
 	}
 
-	// 查找用户角色
-	var userAdmin model.SysUserAdmin
-	s.DB.Where("uid = ?", user.Uid).First(&userAdmin)
+	// 查找用户权限
+	roles, err := s.GetUserRoles(user.Uid)
+	if err != nil {
+		return response, err
+	}
 
 	// 生成token
-	token, err := jwt.GenerateToken(user.Uid, user.UserName, userAdmin.Role)
+	token, err := jwt.GenerateToken(user.Uid, user.UserName, roles)
 	if err != nil {
-		return response, errors.New("生成token失败")
+		return response, common.ReturnErr(common.GEN_TOEKN_ERROR)
 	}
 
 	// 构建响应
 	response.Token = token
 	response.Uid = user.Uid
 	response.Name = user.UserName
-	response.Role = 1 // 默认为1，根据实际情况调整
+	response.Role = roles
 
 	return response, nil
+}
+
+// GetUserRoles 获取用户权限集合
+func (s *LoginService) GetUserRoles(userID int) ([]string, error) {
+	var userRoles []model.AgentUserRole
+	result := s.DB.Select("uid, role_id, agent_user_role.role_status, ar.role_code").
+		Where("uid = ? AND agent_user_role.role_status = 1 AND ar.role_status = 1", userID).
+		Joins("LEFT JOIN agent_role ar ON agent_user_role.role_id = ar.id").
+		Find(&userRoles)
+	if result.Error != nil {
+		return nil, common.ReturnErr(common.ROLE_ERROR)
+	}
+	var roleCodes []string
+	for _, userRole := range userRoles {
+		roleCodes = append(roleCodes, userRole.RoleCode)
+	}
+	return roleCodes, nil
 }

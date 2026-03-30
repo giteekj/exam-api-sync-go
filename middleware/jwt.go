@@ -38,7 +38,7 @@ func JWTAuth() gin.HandlerFunc {
 		// 将用户信息存储到上下文
 		c.Set("user_id", payload.UserID)
 		c.Set("username", payload.Username)
-		c.Set("role", payload.Role)
+		c.Set("roles", payload.Role)
 
 		c.Next()
 	}

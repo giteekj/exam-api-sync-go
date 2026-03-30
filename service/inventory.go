@@ -22,23 +22,6 @@ func NewInventoryService() *InventoryService {
 	}
 }
 
-// GetUserRoles 获取用户权限集合
-func (s *InventoryService) GetUserRoles(userID int) ([]string, error) {
-	var userRoles []model.AgentUserRole
-	result := s.DB.Select("uid, role_id, agent_user_role.role_status, ar.role_code").
-		Where("uid = ? AND agent_user_role.role_status = 1 AND ar.role_status = 1", userID).
-		Joins("LEFT JOIN agent_role ar ON agent_user_role.role_id = ar.id").
-		Find(&userRoles)
-	if result.Error != nil {
-		return nil, common.ReturnErr(common.ROLE_ERROR)
-	}
-	var roleCodes []string
-	for _, userRole := range userRoles {
-		roleCodes = append(roleCodes, userRole.RoleCode)
-	}
-	return roleCodes, nil
-}
-
 // GetInventoryList 获取库存列表
 func (s *InventoryService) GetInventoryList(req req.InventoryQueryRequest, userID int, userRole []string) (resp.InventoryQueryResponse, error) {
 	var total int64
@@ -50,6 +33,10 @@ func (s *InventoryService) GetInventoryList(req req.InventoryQueryRequest, userI
 	advancedQuery := common.StrContains(userRole, common.ADVANCEDQUERY)
 	// 判断用户是否具有全国库存数据查询权限
 	nationalDataQuery := common.StrContains(userRole, common.NATIONALDATAQUERY)
+	// 未配置权限
+	if !realTimeQuery && !advancedQuery && !nationalDataQuery {
+		return resp.InventoryQueryResponse{}, common.ReturnErr(common.ROLE_ERROR)
+	}
 	// 构建查询
 	query := s.DB.Model(&model.AgentInventoryRecord{})
 	if req.Province != "" {
@@ -61,8 +48,13 @@ func (s *InventoryService) GetInventoryList(req req.InventoryQueryRequest, userI
 	} else if req.StartTime != "" && req.EndTime != "" {
 		query.Where("start_time >= ? AND start_time <= ?", req.StartTime, req.EndTime)
 	}
-	if realTimeQuery || advancedQuery {
-		query.Where("uid = ?", userID)
+	// 优化权限逻辑
+	if !nationalDataQuery {
+		// 非全国权限用户只能查询自己的数据
+		query = query.Where("uid = ?", userID)
+	} else {
+		// 全国权限用户可以查询全国数据
+		query.Or("uid = ?", userID).Or("upper_uid = ?", userID).Or("top_uid = ?", userID)
 	}
 	if advancedQuery || nationalDataQuery {
 		if req.UserName != "" {

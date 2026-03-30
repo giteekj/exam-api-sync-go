@@ -11,14 +11,14 @@ import (
 
 // Claims 自定义JWT声明
 type Claims struct {
-	UserID   int    `json:"user_id"`
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	UserID   int      `json:"user_id"`
+	Username string   `json:"username"`
+	Role     []string `json:"role"`
 	jwt.RegisteredClaims
 }
 
 // GenerateToken 生成JWT token
-func GenerateToken(userID int, username string, role string) (string, error) {
+func GenerateToken(userID int, username string, role []string) (string, error) {
 	expireTime := time.Now().Add(time.Duration(setting.JWT.Expire) * time.Second)
 	claims := Claims{
 		UserID:   userID,

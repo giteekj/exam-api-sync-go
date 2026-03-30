@@ -41,14 +41,17 @@ func InventoryQuery(c *gin.Context) {
 		response.ErrorResponse(c, common.LOGIN_EXPIRE, nil)
 		return
 	}
+	// 获取用户权限信息
+	role, exists := c.Get("roles")
+	if !exists {
+		response.ErrorResponse(c, common.ROLE_ERROR, nil)
+	}
+	roles, ok := role.([]string)
+	if !ok {
+		response.ErrorResponse(c, common.ROLE_ERROR, nil)
+	}
 	// 调用服务层处理查询
 	inventoryService := service.NewInventoryService()
-	// 获取用户权限集合
-	roles, err := inventoryService.GetUserRoles(userID.(int))
-	if err != nil {
-		response.ErrorResponse(c, common.SYSTEM_ERROR, nil)
-		return
-	}
 	if len(roles) == 0 {
 		response.ErrorResponse(c, common.ROLE_ERROR, nil)
 		return
