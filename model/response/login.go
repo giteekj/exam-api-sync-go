@@ -1,0 +1,9 @@
+package response
+
+// LoginResponse 登录响应参数
+type LoginResponse struct {
+	Token string `json:"token"`
+	Uid   int    `json:"uid"`
+	Name  string `json:"name"`
+	Role  int    `json:"role"`
+}
