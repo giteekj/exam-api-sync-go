@@ -15,6 +15,7 @@ type Config struct {
 	FxshopSync DatabaseConfig `yaml:"fxshop_sync"`
 	Redis      RedisConfig    `yaml:"redis"`
 	JWT        JWTConfig      `yaml:"jwt"`
+	Sync       SyncConfig     `yaml:"sync"`
 	Limit      LimitConfig    `yaml:"limit"`
 }
 
@@ -58,16 +59,19 @@ type LimitConfig struct {
 	OssData     [][]int `yaml:"oss_data"`
 }
 
+type SyncConfig struct {
+	Token string `yaml:"token"`
+}
+
 // Global 全局配置变量
 var (
-	config      *Config
-	Server      *ServerConfig
-	Fxshop      *DatabaseConfig
-	FxshopSync  *DatabaseConfig
-	Redis       *RedisConfig
-	JWT         *JWTConfig
-	Limit       *LimitConfig
-	ServiceName *string
+	config     *Config
+	Server     *ServerConfig
+	Fxshop     *DatabaseConfig
+	FxshopSync *DatabaseConfig
+	Redis      *RedisConfig
+	JWT        *JWTConfig
+	Sync       *SyncConfig
 )
 
 // Init 初始化配置
@@ -88,5 +92,5 @@ func Init() {
 	FxshopSync = &config.FxshopSync
 	Redis = &config.Redis
 	JWT = &config.JWT
-	Limit = &config.Limit
+	Sync = &config.Sync
 }

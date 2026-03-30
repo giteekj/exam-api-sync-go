@@ -17,3 +17,9 @@ type InventoryQueryRequest struct {
 	PageSize          int    `json:"page_size" form:"page_size"`                   // 每页大小
 	Sort              string `json:"sort" form:"sort"`                             // 排序
 }
+
+type InventorySyncQueryRequest struct {
+	StartTime string `json:"start_time" form:"start_time"` // 开始时间
+	EndTime   string `json:"end_time" form:"end_time"`     // 结束时间
+	Token     string `json:"token" form:"token"`           // 手动同步密钥
+}

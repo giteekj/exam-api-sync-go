@@ -11,6 +11,9 @@ import (
 func RegisteAllRoutes(r *gin.Engine) {
 	root := "/api/"
 	router := r.Group(root)
+	// 登录接口
+	router.POST("inventory/manual/sync", api.InventoryManualSync)
+
 	authorized := r.Group(root)
 
 	// 授权中间件

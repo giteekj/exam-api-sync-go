@@ -55,6 +55,7 @@ type AgentInventoryRecord struct {
 	BusinessFollower        string  `json:"business_follower" gorm:"size:50"`                                          // 业务更进人
 	OperationFollower       string  `json:"operation_follower" gorm:"size:50"`                                         // 运营更进人
 	StoreTime               int     `json:"store_time" gorm:"not null;index"`                                          // 入库时间
+	Status                  int8    `json:"status" gorm:"not null;default:1"`                                          // 数据状态（0：失效，1：正常）
 	CreatedTime             int     `json:"created_time" gorm:"not null"`                                              // 创建时间
 	UpdatedTime             int     `json:"updated_time"`                                                              // 更新时间
 }

@@ -4,11 +4,13 @@ import (
 	"exam-api-sync-go/common/cron"
 	"exam-api-sync-go/common/orm"
 	"exam-api-sync-go/router"
+	"exam-api-sync-go/service"
 	"fmt"
 	"log"
 
 	"exam-api-sync-go/common/redis"
 	"exam-api-sync-go/common/setting"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,14 +27,14 @@ func main() {
 	// 初始化定时任务
 	cron.Init()
 
-	// 直接执行一次库存同步
-	//log.Println("直接执行库存同步任务...")
-	//syncService := service.NewInventorySyncService()
-	//if err := syncService.SyncInventory(); err != nil {
-	//log.Printf("库存同步失败: %v", err)
-	//} else {
-	//log.Println("库存同步成功")
-	//}
+	//直接执行一次库存同步
+	log.Println("直接执行库存同步任务...")
+	syncService := service.NewInventorySyncService()
+	if err := syncService.SyncInventory(); err != nil {
+		log.Printf("库存同步失败: %v", err)
+	} else {
+		log.Println("库存同步成功")
+	}
 
 	// 设置Gin模式
 	if setting.Server.RunMode == "release" {

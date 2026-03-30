@@ -38,7 +38,7 @@ func (s *InventoryService) GetInventoryList(req req.InventoryQueryRequest, userI
 		return resp.InventoryQueryResponse{}, common.ReturnErr(common.ROLE_ERROR)
 	}
 	// 构建查询
-	query := s.DB.Model(&model.AgentInventoryRecord{})
+	query := s.DB.Model(&model.AgentInventoryRecord{}).Where("status = ?", 1)
 	if req.Province != "" {
 		query.Where("province = ?", req.Province)
 	} else if req.City != "" {

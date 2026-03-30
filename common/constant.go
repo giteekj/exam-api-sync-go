@@ -17,6 +17,8 @@ var (
 	PARAMETER_ERROR        = -1011
 	ROLE_ERROR             = -1012
 	GEN_TOEKN_ERROR        = -1013
+	TIMEFORMAT_ERROR       = -1014
+	SYNC_TOKEN_ERROR       = -1015
 	INVALID_MOBILE         = 3001
 	LOGIN_OUT_OF_LIMIT     = 3002
 	SMS_CODE_OUT_OF_LIMIT  = 3003
@@ -43,6 +45,8 @@ var (
 		ADD_FAIL:               "添加失败",
 		UPDATA_FAIL:            "修改失败",
 		DELETE_FAIL:            "删除失败",
+		TIMEFORMAT_ERROR:       "时间格式错误",
+		SYNC_TOKEN_ERROR:       "同步密钥不正确",
 		GEN_TOEKN_ERROR:        "生成token失败",
 		INVALID_MOBILE:         "手机号格式不正确",
 		LOGIN_OUT_OF_LIMIT:     "登录失败次数超出上限!",
