@@ -65,4 +65,9 @@ var (
 	REALTIMEQUERY     = "realTimeQuery"     // 实时库存查询权限
 	ADVANCEDQUERY     = "advancedQuery"     // 高级库存查询权限
 	NATIONALDATAQUERY = "nationalDataQuery" // 全国库存查询权限
+	QueryRole         = map[string]string{
+		"库存实时查询H5": REALTIMEQUERY,
+		"高级查询":     ADVANCEDQUERY,
+		"全国数据权限":   NATIONALDATAQUERY,
+	}
 )

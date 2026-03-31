@@ -7,3 +7,8 @@ type LoginResponse struct {
 	Name  string   `json:"name"`
 	Role  []string `json:"role"`
 }
+
+type SysUserInfo struct {
+	Uid          int `json:"uid"`
+	GroupIDArray int `json:"group_id_array"`
+}

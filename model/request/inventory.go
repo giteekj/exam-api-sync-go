@@ -9,8 +9,8 @@ type InventoryQueryRequest struct {
 	District          string `json:"district" form:"district"`                     // 区县
 	UserName          string `json:"user_name" form:"user_name"`                   // 代理姓名
 	Phone             string `json:"phone" form:"phone"`                           // 手机号
-	UpperUid          string `json:"upper_uid" form:"upper_uid"`                   // 顶代ID
-	TopUid            string `json:"top_uid" form:"top_uid"`                       // 上级ID
+	UpperUid          int    `json:"upper_uid" form:"upper_uid"`                   // 顶代ID
+	TopUid            int    `json:"top_uid" form:"top_uid"`                       // 上级ID
 	BusinessFollower  string `json:"business_follower" form:"business_follower"`   // 业务跟进人
 	OperationFollower string `json:"operation_follower" form:"operation_follower"` // 运营跟进人
 	Page              int    `json:"page" form:"page"`                             // 页码

@@ -31,7 +31,7 @@ func Login(c *gin.Context) {
 		Password: password,
 	})
 	if err != nil {
-		response.ErrorResponse(c, common.FATAL, nil)
+		response.ErrorResponse(c, common.FATAL, nil, err.Error())
 		return
 	}
 

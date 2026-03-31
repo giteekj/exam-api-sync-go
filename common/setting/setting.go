@@ -1,11 +1,18 @@
 package setting
 
 import (
+	"flag"
 	"log"
 	"os"
 	"path/filepath"
+	"testing"
 
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	DatabaseConfigs = make(map[string]*DatabaseConfig)
+	GenFlag         = flag.String("gen", "", "generate model file")
 )
 
 // Config 配置结构
@@ -25,18 +32,22 @@ type ServerConfig struct {
 	HttpPort        int    `yaml:"http_port"`
 	ApiKeyForRPC    string `yaml:"api_key_for_rpc"`
 	ApiKeyForSMSRPC string `yaml:"api_key_for_sms_rpc"`
+	GormLogLevel    int    `yaml:"gorm_log_level"`
 }
 
 // DatabaseConfig 数据库配置
 type DatabaseConfig struct {
-	Host            string `yaml:"host"`
-	Port            int    `yaml:"port"`
-	Username        string `yaml:"username"`
-	Password        string `yaml:"password"`
-	Dbname          string `yaml:"dbname"`
-	MaxIdleConn     int    `yaml:"max_idle_conn"`
-	MaxOpenConn     int    `yaml:"max_open_conn"`
-	ConnMaxLifetime int    `yaml:"conn_max_lifetime"`
+	Type            string   `yaml:"type"`
+	Host            string   `yaml:"host"`
+	Port            int      `yaml:"port"`
+	Username        string   `yaml:"username"`
+	Password        string   `yaml:"password"`
+	Dbname          string   `yaml:"dbname"`
+	MaxIdleConn     int      `yaml:"max_idle_conn"`
+	MaxOpenConn     int      `yaml:"max_open_conn"`
+	ConnMaxLifetime int      `yaml:"conn_max_lifetime"`
+	Replicas        []string `yaml:"replicas"`
+	Sources         []string `yaml:"sources"`
 }
 
 // RedisConfig Redis配置
@@ -76,6 +87,11 @@ var (
 
 // Init 初始化配置
 func Init() {
+	if !testing.Testing() {
+		if !flag.Parsed() {
+			flag.Parse()
+		}
+	}
 	workDir, _ := os.Getwd()
 	yamlFile, err := os.ReadFile(filepath.Join(workDir, "app.yaml"))
 	if err != nil {
@@ -93,4 +109,6 @@ func Init() {
 	Redis = &config.Redis
 	JWT = &config.JWT
 	Sync = &config.Sync
+	DatabaseConfigs[Fxshop.Dbname] = Fxshop
+	DatabaseConfigs[FxshopSync.Dbname] = FxshopSync
 }

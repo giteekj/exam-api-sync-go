@@ -90,3 +90,14 @@ func StrContains(slice []string, value string) bool {
 	}
 	return false
 }
+
+func ArrayColumnString(d []map[string]any, column_key string) []string {
+	nd := []string{}
+	if len(d) == 0 {
+		return nd
+	}
+	for _, v := range d {
+		nd = append(nd, fmt.Sprint(v[column_key]))
+	}
+	return nd
+}

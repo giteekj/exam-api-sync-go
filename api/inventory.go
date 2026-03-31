@@ -80,6 +80,8 @@ func InventoryQuery(c *gin.Context) {
 	req.Phone = body.GetString("phone", c)
 	req.BusinessFollower = body.GetString("business_follower", c)
 	req.OperationFollower = body.GetString("operation_follower", c)
+	req.UpperUid = body.GetInt("upper_uid", c)
+	req.TopUid = body.GetInt("top_uid", c)
 
 	// 获取用户信息
 	userID, exists := c.Get("user_id")
