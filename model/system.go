@@ -1,7 +1,7 @@
 package model
 
-// SysInventoryRecordSync 代理库存同步记录表
-type SysInventoryRecordSync struct {
+// AgentInventoryRecordSync 代理库存同步记录表
+type AgentInventoryRecordSync struct {
 	ID             int    `json:"id" gorm:"primaryKey;autoIncrement"`
 	LastSyncTime   int    `json:"last_sync_time" gorm:"size:11;not null;index"`
 	SyncCount      int    `json:"sync_count" gorm:"size:11;not null;index"`
@@ -15,6 +15,6 @@ type SysInventoryRecordSync struct {
 }
 
 // TableName 指定表名
-func (SysInventoryRecordSync) TableName() string {
-	return "sys_inventory_record_sync"
+func (AgentInventoryRecordSync) TableName() string {
+	return "agent_inventory_record_sync"
 }

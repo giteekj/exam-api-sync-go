@@ -24,10 +24,8 @@ type InventoryRecordItem struct {
 	ActiveCodeConsumption   float64 `json:"active_code_consumption"`
 	FullCodeConsumption     float64 `json:"full_code_consumption"`
 	SingleCodeConsumption   float64 `json:"single_code_consumption"`
-	Province                string  `json:"province"`
-	City                    string  `json:"city"`
-	District                string  `json:"district"`
+	UpperUid                int     `json:"upper_uid"`
+	TopUid                  int     `json:"top_uid"`
 	BusinessFollower        string  `json:"business_follower"`
 	OperationFollower       string  `json:"operation_follower"`
-	StoreTime               int     `json:"store_time"`
 }

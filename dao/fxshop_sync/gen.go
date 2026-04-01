@@ -16,44 +16,39 @@ import (
 )
 
 var (
-	Q                      = new(Query)
-	AgentInventoryRecord   *agentInventoryRecord
-	AgentRole              *agentRole
-	SysInventoryRecordSync *sysInventoryRecordSync
+	Q                        = new(Query)
+	AgentInventoryRecord     *agentInventoryRecord
+	AgentInventoryRecordSync *agentInventoryRecordSync
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	AgentInventoryRecord = &Q.AgentInventoryRecord
-	AgentRole = &Q.AgentRole
-	SysInventoryRecordSync = &Q.SysInventoryRecordSync
+	AgentInventoryRecordSync = &Q.AgentInventoryRecordSync
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:                     db,
-		AgentInventoryRecord:   newAgentInventoryRecord(db, opts...),
-		AgentRole:              newAgentRole(db, opts...),
-		SysInventoryRecordSync: newSysInventoryRecordSync(db, opts...),
+		db:                       db,
+		AgentInventoryRecord:     newAgentInventoryRecord(db, opts...),
+		AgentInventoryRecordSync: newAgentInventoryRecordSync(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	AgentInventoryRecord   agentInventoryRecord
-	AgentRole              agentRole
-	SysInventoryRecordSync sysInventoryRecordSync
+	AgentInventoryRecord     agentInventoryRecord
+	AgentInventoryRecordSync agentInventoryRecordSync
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:                     db,
-		AgentInventoryRecord:   q.AgentInventoryRecord.clone(db),
-		AgentRole:              q.AgentRole.clone(db),
-		SysInventoryRecordSync: q.SysInventoryRecordSync.clone(db),
+		db:                       db,
+		AgentInventoryRecord:     q.AgentInventoryRecord.clone(db),
+		AgentInventoryRecordSync: q.AgentInventoryRecordSync.clone(db),
 	}
 }
 
@@ -67,24 +62,21 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:                     db,
-		AgentInventoryRecord:   q.AgentInventoryRecord.replaceDB(db),
-		AgentRole:              q.AgentRole.replaceDB(db),
-		SysInventoryRecordSync: q.SysInventoryRecordSync.replaceDB(db),
+		db:                       db,
+		AgentInventoryRecord:     q.AgentInventoryRecord.replaceDB(db),
+		AgentInventoryRecordSync: q.AgentInventoryRecordSync.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	AgentInventoryRecord   IAgentInventoryRecordDo
-	AgentRole              IAgentRoleDo
-	SysInventoryRecordSync ISysInventoryRecordSyncDo
+	AgentInventoryRecord     IAgentInventoryRecordDo
+	AgentInventoryRecordSync IAgentInventoryRecordSyncDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		AgentInventoryRecord:   q.AgentInventoryRecord.WithContext(ctx),
-		AgentRole:              q.AgentRole.WithContext(ctx),
-		SysInventoryRecordSync: q.SysInventoryRecordSync.WithContext(ctx),
+		AgentInventoryRecord:     q.AgentInventoryRecord.WithContext(ctx),
+		AgentInventoryRecordSync: q.AgentInventoryRecordSync.WithContext(ctx),
 	}
 }
 

@@ -27,7 +27,9 @@ type AgentInventoryRecord struct {
 	Province                string  `gorm:"column:province;type:varchar(50);not null;comment:省" json:"province"`                                                     // 省
 	City                    string  `gorm:"column:city;type:varchar(50);not null;comment:市：空表示全域" json:"city"`                                                       // 市：空表示全域
 	District                string  `gorm:"column:district;type:varchar(50);not null;comment:区/县：空表示全域" json:"district"`                                             // 区/县：空表示全域
+	BusinessFollowerUID     int     `gorm:"column:business_follower_uid;type:int(11);not null;comment:业务跟进人用户ID" json:"business_follower_uid"`                       // 业务跟进人用户ID
 	BusinessFollower        string  `gorm:"column:business_follower;type:varchar(50);not null;comment:业务跟进人" json:"business_follower"`                               // 业务跟进人
+	OperationFollowerUID    int     `gorm:"column:operation_follower_uid;type:int(11);not null;comment:运营跟进人用户ID" json:"operation_follower_uid"`                     // 运营跟进人用户ID
 	OperationFollower       string  `gorm:"column:operation_follower;type:varchar(50);not null;comment:运营跟进人" json:"operation_follower"`                             // 运营跟进人
 	StoreTime               int     `gorm:"column:store_time;type:int(11);not null;comment:入库时间" json:"store_time"`                                                  // 入库时间
 	Status                  int8    `gorm:"column:status;type:tinyint(2);not null;default:1;comment:数据状态 0：失效，1：正常" json:"status"`                                   // 数据状态 0：失效，1：正常

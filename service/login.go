@@ -38,6 +38,7 @@ func (s *LoginService) Login(req request.LoginRequest) (response.LoginResponse, 
 	// 查找用户
 	u := daofxshop.Use(s.DB).SysUser
 	user, err := u.Where(u.UserName.Eq(req.Username), u.UserPassword.Eq(common.MD5(req.Password)), u.UserStatus.Eq(1)).
+		Or(u.UserTel.Eq(req.Username)).
 		Select(u.UID, u.UserName, u.UserPassword).
 		First()
 	if err != nil {
@@ -83,6 +84,9 @@ func (s *LoginService) GetUserRoles(userID int) ([]string, error) {
 	}
 	var groupIds []int
 	for _, v := range data {
+		if v.GroupIDArray == 0 {
+			continue
+		}
 		groupIds = append(groupIds, v.GroupIDArray)
 	}
 	if len(groupIds) == 0 {
@@ -101,6 +105,9 @@ func (s *LoginService) GetUserRoles(userID int) ([]string, error) {
 		moduleIds  []int
 	)
 	for _, v := range groupData {
+		if v.ModuleIDArray == "" {
+			continue
+		}
 		moduleIdList := strings.Split(v.ModuleIDArray, ",")
 		for _, vv := range moduleIdList {
 			moduleIdSs = append(moduleIdSs, vv)
@@ -118,8 +125,7 @@ func (s *LoginService) GetUserRoles(userID int) ([]string, error) {
 	}
 
 	// 查询模块
-	var moduleData []map[string]any
-
+	var moduleData []modelfxshop.SysModule
 	m := useDB.SysModule
 	err = m.Where(m.ModuleID.In(moduleIds...)).Select(m.ModuleName).Scan(&moduleData)
 	if err != nil {
@@ -127,10 +133,10 @@ func (s *LoginService) GetUserRoles(userID int) ([]string, error) {
 	}
 	moduleMap := make(map[string]string)
 	for _, v := range moduleData {
-		moduleName, ok := v["module_name"].(string)
-		if ok {
-			moduleMap[moduleName] = moduleName
+		if v.ModuleName == "" {
+			continue
 		}
+		moduleMap[v.ModuleName] = v.ModuleName
 	}
 	var userRoles []string
 	for _, v := range moduleMap {

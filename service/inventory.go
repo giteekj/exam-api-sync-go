@@ -6,6 +6,7 @@ import (
 	daofxshopSync "exam-api-sync-go/dao/fxshop_sync"
 	req "exam-api-sync-go/model/request"
 	resp "exam-api-sync-go/model/response"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -20,7 +21,7 @@ type InventoryService struct {
 func NewInventoryService() *InventoryService {
 	db := orm.GetDB("fxshop_sync")
 	if db != nil {
-		daofxshopSync.SetDefault(db)
+		//daofxshopSync.SetDefault(db)
 	}
 	return &InventoryService{
 		DB: db,
@@ -45,19 +46,28 @@ func (s *InventoryService) GetInventoryList(req req.InventoryQueryRequest, userI
 	air := daofxshopSync.Use(s.DB).AgentInventoryRecord
 	query := air.Where(air.Status.Eq(1))
 	if req.Province != "" {
-		query.Where(air.Province.Eq(req.Province))
-	} else if req.City != "" {
-		query.Where(air.City.Eq(req.City))
-	} else if req.District != "" {
-		query.Where(air.District.Eq(req.District))
-	} else if req.StartTime != "" && req.EndTime != "" {
+		query.Where(air.Province.Like(fmt.Sprintf("%%%s%%", req.Province)))
+	}
+	if req.City != "" {
+		query.Where(air.City.Like(fmt.Sprintf("%%%s%%", req.City)))
+	}
+	if req.District != "" {
+		query.Where(air.District.Like(fmt.Sprintf("%%%s%%", req.District)))
+	}
+	if req.StartTime != "" && req.EndTime != "" {
+		// 定义时间格式
+		layout := "2006-01-02"
 		// 解析日期时间字符串为time.Time对象，默认时间是00:00:00
-		tStart, err := time.Parse("2006-01-02", req.StartTime)
+		loc, err := time.LoadLocation("Local")
+		if err != nil {
+			return resp.InventoryQueryResponse{}, err
+		}
+		tStart, err := time.ParseInLocation(layout, req.StartTime, loc)
 		if err != nil {
 			return resp.InventoryQueryResponse{}, err
 		}
 		startTimestamp := tStart.Unix()
-		tEnd, err := time.Parse("2006-01-02", req.EndTime)
+		tEnd, err := time.ParseInLocation(layout, req.EndTime, loc)
 		if err != nil {
 			return resp.InventoryQueryResponse{}, err
 		}
@@ -68,25 +78,28 @@ func (s *InventoryService) GetInventoryList(req req.InventoryQueryRequest, userI
 	}
 	// 优化权限逻辑
 	if !nationalDataQuery {
-		// 非全国权限用户只能查询自己的数据
-		query = query.Where(air.UID.Eq(userID))
-	} else {
-		// 全国权限用户可以查询全国数据
-		query.Or(air.UID.Eq(userID)).Or(air.UpperUID.Eq(userID)).Or(air.TopUID.Eq(userID))
+		// 非全国权限用户只能查询自己名下的数据(用户ID是自己、业务跟进人用户ID\运营跟进人用户ID是自己)
+		query.Where(air.Where(air.UID.Eq(userID)).Or(air.BusinessFollowerUID.Eq(userID)).Or(air.OperationFollowerUID.Eq(userID)))
 	}
+	// 全国用户可查询所有数据
 	if advancedQuery || nationalDataQuery {
 		if req.UserName != "" {
-			query.Where(air.UserName.Eq(req.UserName))
-		} else if req.Phone != "" {
+			query.Where(air.UserName.Like(fmt.Sprintf("%%%s%%", req.UserName)))
+		}
+		if req.Phone != "" {
 			query.Where(air.Phone.Eq(req.Phone))
-		} else if req.UpperUid != 0 {
+		}
+		if req.UpperUid != 0 {
 			query.Where(air.UpperUID.Eq(req.UpperUid))
-		} else if req.TopUid != 0 {
+		}
+		if req.TopUid != 0 {
 			query.Where(air.TopUID.Eq(req.TopUid))
-		} else if req.BusinessFollower != "" {
-			query.Where(air.BusinessFollower.Eq(req.BusinessFollower))
-		} else if req.OperationFollower != "" {
-			query.Where(air.OperationFollower.Eq(req.OperationFollower))
+		}
+		if req.BusinessFollower != "" {
+			query.Where(air.BusinessFollower.Like(fmt.Sprintf("%%%s%%", req.BusinessFollower)))
+		}
+		if req.OperationFollower != "" {
+			query.Where(air.OperationFollower.Like(fmt.Sprintf("%%%s%%", req.OperationFollower)))
 		}
 	}
 	// 总数
@@ -104,7 +117,7 @@ func (s *InventoryService) GetInventoryList(req req.InventoryQueryRequest, userI
 	// 分页
 	offset := (req.Page - 1) * req.PageSize
 	var list []resp.InventoryRecordItem
-	err = query.Offset(offset).Limit(req.PageSize).Scan(&list)
+	err = query.Debug().Offset(offset).Limit(req.PageSize).Scan(&list)
 	if err != nil {
 		return resp.InventoryQueryResponse{}, err
 	}

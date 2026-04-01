@@ -19,6 +19,7 @@ var (
 	GEN_TOEKN_ERROR        = -1013
 	TIMEFORMAT_ERROR       = -1014
 	SYNC_TOKEN_ERROR       = -1015
+	GET_TIME_ERROR         = -1016
 	INVALID_MOBILE         = 3001
 	LOGIN_OUT_OF_LIMIT     = 3002
 	SMS_CODE_OUT_OF_LIMIT  = 3003
@@ -46,6 +47,7 @@ var (
 		UPDATA_FAIL:            "修改失败",
 		DELETE_FAIL:            "删除失败",
 		TIMEFORMAT_ERROR:       "时间格式错误",
+		GET_TIME_ERROR:         "获取本地时间失败",
 		SYNC_TOKEN_ERROR:       "同步密钥不正确",
 		GEN_TOEKN_ERROR:        "生成token失败",
 		INVALID_MOBILE:         "手机号格式不正确",

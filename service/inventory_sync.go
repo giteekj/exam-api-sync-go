@@ -38,7 +38,7 @@ func (s *InventorySyncService) SyncInventory() error {
 	endOfDay := time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 23, 59, 59, 999999999, yesterday.Location())
 
 	for i := 0; i < maxRetries; i++ {
-		err = s.DoSyncInventory(startOfDay, endOfDay, "auto")
+		_, err = s.DoSyncInventory(startOfDay, endOfDay, "auto")
 		if err == nil {
 			return nil
 		}
@@ -50,7 +50,7 @@ func (s *InventorySyncService) SyncInventory() error {
 }
 
 // DoSyncInventory 实际执行同步操作
-func (s *InventorySyncService) DoSyncInventory(beginTime, endTime time.Time, syncType string) error {
+func (s *InventorySyncService) DoSyncInventory(beginTime, endTime time.Time, syncType string) (string, error) {
 	startTimestamp := beginTime.Unix()
 	endTimestamp := endTime.Unix()
 	log.Printf("开始同步 %s 到 %s 的库存数据", beginTime.Format("2006-01-02 15:04:05"), endTime.Format("2006-01-02 15:04:05"))
@@ -61,6 +61,7 @@ func (s *InventorySyncService) DoSyncInventory(beginTime, endTime time.Time, syn
 		PurchaseQuantity  float64 `json:"purchase_quantity"`
 		Uid               int     `json:"uid"`
 		UserName          string  `json:"user_name"`
+		RealName          string  `json:"real_name"`
 		Phone             string  `json:"phone"`
 		Balance           float64 `json:"balance"`
 		Type              int     `json:"type"`
@@ -85,7 +86,7 @@ func (s *InventorySyncService) DoSyncInventory(beginTime, endTime time.Time, syn
 	query := `
 SELECT 
 su.uid,
-su.user_name,
+su.real_name,
 su.user_tel as phone,
 nm.balance,
 nm.type,
@@ -98,8 +99,8 @@ nm.back,
 COALESCE(var.province, '') as province,
 COALESCE(var.city, '') as city,
 COALESCE(var.district, '') as district,
-COALESCE(me.tracker, '') as business_follower,
-COALESCE(me.opt_tracker, '') as operation_follower,
+(SELECT su.real_name FROM sys_user su WHERE me.sales_uid = su.uid) as business_follower,
+(SELECT su.real_name FROM sys_user su WHERE me.operation_uid = su.uid) as operation_follower,
 COALESCE(me.partner_parent_id, 0) as upper_uid,
 COALESCE(me.top_partner_id, 0) as top_uid,
 nm.create_time,
@@ -112,13 +113,13 @@ sys_user su ON nm.uid = su.uid
 LEFT JOIN 
 vsl_member me ON nm.uid = me.uid
 LEFT JOIN 
-vsl_agent_region var ON nm.uid = var.uid AND var.status < 2 AND var.delete_at = 0 AND var.store_status < 7 
+vsl_agent_region var ON nm.uid = var.uid AND var.status < 2 AND var.delete_at = 0 AND var.store_status < 7
 LEFT JOIN
 agent_contract_log acl ON nm.uid = acl.uid
 Where nm.create_time >= ? AND nm.create_time <= ?
 `
 	if err := s.FxshopDB.Raw(query, startTimestamp, endTimestamp).Scan(&inventoryData).Error; err != nil {
-		return fmt.Errorf("查询库存数据失败: %v", err)
+		return "error", fmt.Errorf("查询库存数据失败: %v", err)
 	}
 
 	if len(inventoryData) == 0 {
@@ -127,7 +128,7 @@ Where nm.create_time >= ? AND nm.create_time <= ?
 			log.Printf("插入数据同步记录失败 %v", err)
 		}
 		log.Println("没有需要同步的库存数据")
-		return nil
+		return "error", nil
 	}
 
 	// 判断全科码/单科码
@@ -150,7 +151,7 @@ Where nm.create_time >= ? AND nm.create_time <= ?
 		activeCodeConsumption = activeCodeConsumption + singleCodeConsumption
 		record := model.AgentInventoryRecord{
 			Uid:                     data.Uid,
-			UserName:                data.UserName,
+			UserName:                data.RealName,
 			Phone:                   data.Phone,
 			PurchasePrice:           data.PurchasePrice,
 			PurchaseQuantity:        data.PurchaseQuantity,
@@ -205,7 +206,7 @@ Where nm.create_time >= ? AND nm.create_time <= ?
 
 	if err != nil {
 		log.Printf("插入数据失败 %v", err)
-		return fmt.Errorf("插入数据失败: %v", err)
+		return "error", fmt.Errorf("插入数据失败: %v", err)
 	}
 
 	err = s.saveSyncRecord(len(records), int(startTimestamp), int(endTimestamp), query, syncType)
@@ -214,13 +215,14 @@ Where nm.create_time >= ? AND nm.create_time <= ?
 	}
 
 	log.Printf("库存同步完成，共同步 %d 条记录", len(records))
-	return nil
+	record := fmt.Sprintf("库存同步完成，库存开始时间：%v, 库存结束时间：%v，共同步 %v 条记录", beginTime.Format("2006-01-02 15:04:05"), endTime.Format("2006-01-02 15:04:05"), len(records))
+	return record, nil
 }
 
 // saveSyncRecord 保存库存同步记录
 func (s *InventorySyncService) saveSyncRecord(count, queryStartTime, queryEndTime int, querySql, syncType string) error {
 	now := time.Now().Unix()
-	syncRecord := model.SysInventoryRecordSync{
+	syncRecord := model.AgentInventoryRecordSync{
 		LastSyncTime:   int(now),
 		SyncCount:      count,
 		SyncStatus:     "success",

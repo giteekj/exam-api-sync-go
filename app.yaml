@@ -1,7 +1,7 @@
 ﻿server:
   run_mode: debug
   http_port: 8080
-  gormLogLevel: 4 # Silent Error Warn Info 1开始
+  gormLogLevel: 1 # Silent Error Warn Info 1开始
   api_key_for_rpc: "test_api_key"
   api_key_for_sms_rpc: "test_sms_api_key"
 

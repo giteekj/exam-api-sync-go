@@ -47,7 +47,9 @@ func newAgentInventoryRecord(db *gorm.DB, opts ...gen.DOOption) agentInventoryRe
 	_agentInventoryRecord.Province = field.NewString(tableName, "province")
 	_agentInventoryRecord.City = field.NewString(tableName, "city")
 	_agentInventoryRecord.District = field.NewString(tableName, "district")
+	_agentInventoryRecord.BusinessFollowerUID = field.NewInt(tableName, "business_follower_uid")
 	_agentInventoryRecord.BusinessFollower = field.NewString(tableName, "business_follower")
+	_agentInventoryRecord.OperationFollowerUID = field.NewInt(tableName, "operation_follower_uid")
 	_agentInventoryRecord.OperationFollower = field.NewString(tableName, "operation_follower")
 	_agentInventoryRecord.StoreTime = field.NewInt(tableName, "store_time")
 	_agentInventoryRecord.Status = field.NewInt8(tableName, "status")
@@ -83,7 +85,9 @@ type agentInventoryRecord struct {
 	Province                field.String  // 省
 	City                    field.String  // 市：空表示全域
 	District                field.String  // 区/县：空表示全域
+	BusinessFollowerUID     field.Int     // 业务跟进人用户ID
 	BusinessFollower        field.String  // 业务跟进人
+	OperationFollowerUID    field.Int     // 运营跟进人用户ID
 	OperationFollower       field.String  // 运营跟进人
 	StoreTime               field.Int     // 入库时间
 	Status                  field.Int8    // 数据状态 0：失效，1：正常
@@ -124,7 +128,9 @@ func (a *agentInventoryRecord) updateTableName(table string) *agentInventoryReco
 	a.Province = field.NewString(table, "province")
 	a.City = field.NewString(table, "city")
 	a.District = field.NewString(table, "district")
+	a.BusinessFollowerUID = field.NewInt(table, "business_follower_uid")
 	a.BusinessFollower = field.NewString(table, "business_follower")
+	a.OperationFollowerUID = field.NewInt(table, "operation_follower_uid")
 	a.OperationFollower = field.NewString(table, "operation_follower")
 	a.StoreTime = field.NewInt(table, "store_time")
 	a.Status = field.NewInt8(table, "status")
@@ -146,7 +152,7 @@ func (a *agentInventoryRecord) GetFieldByName(fieldName string) (field.OrderExpr
 }
 
 func (a *agentInventoryRecord) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 25)
+	a.fieldMap = make(map[string]field.Expr, 27)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["uid"] = a.UID
 	a.fieldMap["user_name"] = a.UserName
@@ -166,7 +172,9 @@ func (a *agentInventoryRecord) fillFieldMap() {
 	a.fieldMap["province"] = a.Province
 	a.fieldMap["city"] = a.City
 	a.fieldMap["district"] = a.District
+	a.fieldMap["business_follower_uid"] = a.BusinessFollowerUID
 	a.fieldMap["business_follower"] = a.BusinessFollower
+	a.fieldMap["operation_follower_uid"] = a.OperationFollowerUID
 	a.fieldMap["operation_follower"] = a.OperationFollower
 	a.fieldMap["store_time"] = a.StoreTime
 	a.fieldMap["status"] = a.Status

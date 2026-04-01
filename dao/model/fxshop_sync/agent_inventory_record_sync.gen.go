@@ -4,10 +4,10 @@
 
 package fxshop_sync
 
-const TableNameSysInventoryRecordSync = "sys_inventory_record_sync"
+const TableNameAgentInventoryRecordSync = "agent_inventory_record_sync"
 
-// SysInventoryRecordSync 代理库存同步记录表
-type SysInventoryRecordSync struct {
+// AgentInventoryRecordSync 代理库存同步记录表
+type AgentInventoryRecordSync struct {
 	ID             int    `gorm:"column:id;type:int(11) unsigned;primaryKey;autoIncrement:true;comment:主键id" json:"id"`               // 主键id
 	LastSyncTime   int    `gorm:"column:last_sync_time;type:int(11);not null;comment:上次同步时间" json:"last_sync_time"`                   // 上次同步时间
 	SyncCount      int    `gorm:"column:sync_count;type:int(11);not null;comment:同步条数" json:"sync_count"`                             // 同步条数
@@ -20,7 +20,7 @@ type SysInventoryRecordSync struct {
 	UpdatedTime    int    `gorm:"column:updated_time;type:int(11);comment:更新时间" json:"updated_time"`                                  // 更新时间
 }
 
-// TableName SysInventoryRecordSync's table name
-func (*SysInventoryRecordSync) TableName() string {
-	return TableNameSysInventoryRecordSync
+// TableName AgentInventoryRecordSync's table name
+func (*AgentInventoryRecordSync) TableName() string {
+	return TableNameAgentInventoryRecordSync
 }

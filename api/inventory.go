@@ -33,25 +33,33 @@ func InventoryManualSync(c *gin.Context) {
 		response.ErrorResponse(c, common.SYNC_TOKEN_ERROR, nil)
 	}
 	// 定义时间格式
-	layout := "2006-01-02 15:04:05"
-	// 使用Parse函数解析时间字符串
-	parsedStartTime, err := time.Parse(layout, req.StartTime)
+	layout := "2006-01-02"
+	loc, err := time.LoadLocation("Local")
+	if err != nil {
+		response.ErrorResponse(c, common.GET_TIME_ERROR, nil)
+		return
+	}
+	parsedStartTime, err := time.ParseInLocation(layout, req.StartTime, loc)
 	if err != nil {
 		response.ErrorResponse(c, common.TIMEFORMAT_ERROR, nil)
 		return
 	}
-	parsedEndTime, err := time.Parse(layout, req.EndTime)
+	endTime, err := time.ParseInLocation(layout, req.EndTime, loc)
 	if err != nil {
 		response.ErrorResponse(c, common.TIMEFORMAT_ERROR, nil)
 		return
 	}
+	parsedEndTime := endTime.Add(23*time.Hour + 59*time.Minute + 59*time.Second)
 	syncService := service.NewInventorySyncService()
-	if err := syncService.DoSyncInventory(parsedStartTime, parsedEndTime, "manual"); err != nil {
+	if msg, err := syncService.DoSyncInventory(parsedStartTime, parsedEndTime, "manual"); err != nil {
 		log.Printf("库存手动同步失败: %v", err)
 		response.ErrorResponse(c, common.FATAL, nil, err.Error())
 	} else {
 		log.Println("库存手动同步成功")
-		response.ErrorResponse(c, common.SUCCESS, nil)
+		data := map[string]string{
+			"message": msg,
+		}
+		response.ErrorResponse(c, common.SUCCESS, data)
 	}
 }
 
@@ -73,6 +81,14 @@ func InventoryQuery(c *gin.Context) {
 	}
 	req.StartTime = body.GetString("start_time", c)
 	req.EndTime = body.GetString("end_time", c)
+	if req.StartTime != "" && req.EndTime == "" {
+		response.ErrorResponse(c, common.TIMEFORMAT_ERROR, nil)
+		return
+	}
+	if req.StartTime == "" && req.EndTime != "" {
+		response.ErrorResponse(c, common.TIMEFORMAT_ERROR, nil)
+		return
+	}
 	req.Province = body.GetString("province", c)
 	req.City = body.GetString("city", c)
 	req.District = body.GetString("district", c)
@@ -103,6 +119,9 @@ func InventoryQuery(c *gin.Context) {
 	if len(roles) == 0 {
 		response.ErrorResponse(c, common.ROLE_ERROR, nil)
 		return
+	}
+	roles = []string{
+		"advancedQuery",
 	}
 	result, err := inventoryService.GetInventoryList(req, userID.(int), roles)
 	if err != nil {
